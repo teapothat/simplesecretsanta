@@ -13,6 +13,7 @@ Usage
 
 Fill  in the configuration file. Copy the template to config.json
 
+```json
 {
   "mailserver": {
     "server": "YOUR EMAIL SERVER",
@@ -33,18 +34,19 @@ Fill  in the configuration file. Copy the template to config.json
      ]
   }
 }
+```
 
 If you use a gmail address you need to generate an app password as explianed here:
 https://support.google.com/accounts/answer/185833?hl=en 
 
 to see test output
-    python secretsanta.py --dry
+>   python secretsanta.py --dry
  
 to actually send e-mails:
-    python secretsanta.py
+>    python secretsanta.py
 
 to see help
-    python secretsanta.py -h
+>    python secretsanta.py -h
 
 Specify a different config file by using option --config
 
