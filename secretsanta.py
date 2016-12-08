@@ -3,15 +3,17 @@ import json
 import random
 import smtplib
 import argparse
-from email.mime.text import MIMEText
 
 
 def send_mail(subject, message, recepient, config):
     """ Sends an e-mail with subject and message to recepient, using config settings. """
-    mail_message = MIMEText(message)
-    mail_message['Subject'] = subject
-    mail_message['From'] = config["sender"]
-    mail_message['To'] = recepient
+    mail_message = msg = "\r\n".join([
+          "From: %s" % config["sender"],
+          "To: %s" % recepient,
+          "Subject: %s" % subject,
+          "",
+          message
+          ])
 
     username = config["sender"]
     password = config["password"]
@@ -19,7 +21,7 @@ def send_mail(subject, message, recepient, config):
     server.ehlo()
     server.starttls()
     server.login(username, password)
-    server.sendmail(config["sender"], [recepient], mail_message.as_string())
+    server.sendmail(config["sender"], [recepient], mail_message)
     server.quit()
 
 
@@ -52,8 +54,8 @@ def secret_santa(participants, mailtemplate, mailserver, dry=True):
             continue
 
         send_mail(mailtemplate["subject"],
-                  participants[giver],
                   personalised_message,
+                  participants[giver],
                   mailserver)
 
 
@@ -66,7 +68,7 @@ def main(args):
     args = parser.parse_args(args)
     config = load_config(args.config)
 
-    secret_santa(config["participants"], config["message"], config["mailserver"])
+    secret_santa(config["participants"], config["message"], config["mailserver"], args.dry)
 
 
 if __name__ == "__main__":
