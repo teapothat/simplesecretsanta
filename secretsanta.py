@@ -3,17 +3,16 @@ import json
 import random
 import smtplib
 import argparse
+from email.mime.text import MIMEText
 
 
 def send_mail(subject, message, recepient, config):
     """ Sends an e-mail with subject and message to recepient, using config settings. """
-    mail_message = msg = "\r\n".join([
-          "From: %s" % config["sender"],
-          "To: %s" % recepient,
-          "Subject: %s" % subject,
-          "",
-          message
-          ])
+
+    msg = MIMEText(message.encode('utf-8'), _charset='utf-8')
+    msg['Subject'] = subject
+    msg['From'] = config["sender"]
+    msg['To'] = recepient
 
     username = config["sender"]
     password = config["password"]
@@ -21,13 +20,13 @@ def send_mail(subject, message, recepient, config):
     server.ehlo()
     server.starttls()
     server.login(username, password)
-    server.sendmail(config["sender"], [recepient], mail_message)
+    server.sendmail(config["sender"], [recepient], msg.as_string())
     server.quit()
 
 
 def load_config(file_name):
     """ Simple helper function to load a json as a dict from a file name. """
-    with open(file_name) as f:
+    with open(file_name, encoding='utf-8') as f:
         return json.loads(f.read())
 
 
@@ -48,14 +47,14 @@ def secret_santa(participants, mailtemplate, mailserver, dry=True):
     message = "\n".join(mailtemplate["message"])
 
     for giver, receiver in santas_list.items():
-        personalised_message = message.format(name=receiver)
+        personalised_message = message.format(name=receiver, address=participants[receiver]["address"], phonenr=participants[receiver]["phonenr"])
         if dry:
-            print("%s[%s]: %s" % (giver, participants[giver], personalised_message))
+            print("%s[%s]: %s" % (giver, participants[giver]["email"], personalised_message))
             continue
 
         send_mail(mailtemplate["subject"],
                   personalised_message,
-                  participants[giver],
+                  participants[giver]["email"],
                   mailserver)
 
 
